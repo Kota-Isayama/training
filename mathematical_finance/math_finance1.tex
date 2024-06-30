@@ -1,0 +1,215 @@
+\documentclass{jsarticle}
+
+
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+
+\title{数理ファイナンス1}
+\author{諌山航太}
+
+
+\usepackage{amsthm}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{prop}[dfn]{Proposition}
+\newtheorem{lem}[dfn]{補題}
+\newtheorem{thm}[dfn]{Theorem}
+\newtheorem{cor}[dfn]{Corollary}
+\newtheorem{rem}[dfn]{Remark}
+% \newtheorem*{rem*}[dfn]{Remark}
+\newtheorem{fact}[dfn]{Fact}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\begin{document}
+\maketitle
+
+\subsection{2次変分}
+この節では，2次変分の定義やその性質を議論する．まずはじめに基本的なマルチンゲールであるブラウン運動に対する2次変分（らしきもの）の性質を考えてみて，マルチンゲール全体の2次変分に成り立っていて欲しい性質を考える．さらにその後の節でマルチンゲールに対する2次変分の定義を事実を元にして与える．
+
+\subsubsection{ブラウン運動の2次変分の直感的議論}
+\begin{prop}[]
+    $\langle W, W \rangle_T^{\Delta} \rightarrow T$ $(\|\Delta\|\rightarrow 0, L^2$収束$)$.
+\end{prop}
+\begin{proof}
+    \begin{align*}
+        \mathrm{E}\left[\left(\langle W, W\rangle_T^{\Delta} - T\right)^2\right] &= V\left(\langle W, W\rangle_T^{\Delta} - T\right)\\
+        &= \mathrm{V}\left(\langle W, W\rangle_T^{\Delta}\right)\\
+        &= \mathrm{V}\left(\sum_{\Delta} (W_{t_i} - W_{t_{i-1}})^2\right)\\
+        &= \sum_{\Delta} \mathrm{V}\left( (W_{t_i} - W_{t_{i-1}})^2\right)\\
+        &= \sum_{\Delta} \left\{\mathrm{E}\left[(W_{t_i} - W_{t_{i-1}})^4\right] - \mathrm{E}\left[(W_{t_i} - W_{t_{i-1}})^2\right]^2\right\}\\
+        &= \sum_{\Delta} \left\{3(t_i - t_{i-1})^2 - (t_i - t_{i-1})^2\right\}\\
+        &= \sum_{\Delta} 2(t_i - t_{i-1})^2\\
+        &\leq 2\|\Delta\| \sum_{\Delta} (t_i - t_{i-1})
+        = 2\|\Delta\| T \rightarrow 0 \qquad(\|\Delta\| \rightarrow 0)
+    \end{align*}
+    ただし，１つ目の等号は$\langle W, W\rangle_T^{\Delta}$が平均$T$であることから従う．２つ目の等号は分散の定数の差に対する不変性から成り立つ．４つ目の等号はブラウン運動の独立増分性から，６つ目の等号はブラウン運動の定常正規性から従う．
+\end{proof}
+
+この命題を無理やり解釈してみる．$\Delta$を十分細かくとると，以下のようにみなすことができる．
+\begin{equation*}
+    \langle W, W\rangle_{\Delta}^T := \sum_{\Delta}\left(W_{t_i} - W_{t_{i-1}}\right)^2 \simeq T = \sum_{\Delta} (t_i - t_{i-1})
+\end{equation*}
+ここで$(W_{t_i} - W_{t_{i-1}})^2$を$\mathrm{d}W_t\mathrm{d}W_t$と置き換え，$t_i - t_{i-1}$を$\mathrm{d}t$に置き換えることで，形式的に$\mathrm{d}W_t\mathrm{d}W_t = \mathrm{dt}$を得る．
+つまり２次変分は単位時間あたり1だけ増加するということが（厳密ではないが）わかる．
+
+今，$W$の2次変分を（厳密ではないが）求めた．ここからは他の2次変分が取ってほしい値を考える．
+\begin{prop}\label{prop:nijihenbun_all}
+    $$\mathrm{d}t\mathrm{d}t = 0,\quad \mathrm{d}t\mathrm{d}W_t = 0,\quad \mathrm{d}W_t\mathrm{d}W'_t = 0$$
+    である．ただし$W, W'$は独立したブラウン運動である．
+\end{prop}
+\begin{proof}
+    \begin{align*}
+        \sum_{\Delta}(t_i - t_{i-1})^2 \leq \|\Delta\| \sum_{\Delta}(t_i - t_{i-1}) = \|\Delta\|T\rightarrow 0
+    \end{align*}
+    よって$\mathrm{d}t\mathrm{d}t = 0$である．
+    
+    \begin{align*}
+        \left\|\sum_{\Delta}(t_i - t_{i-1})(W_{t_i} - W_{t_{i-1}}\right\| &\leq \sum_{\Delta}\|t_i - t_{i-1}\|\|W_{t_i} - W_{t_{i-1}}\|\\
+        &= \max_{i} \|W_{t_i} - W_{t_{i-1}}\| T \rightarrow 0 \cdot T\quad (\|\Delta\| \rightarrow 0)
+    \end{align*}
+    よって，$\mathrm{d}t\mathrm{d}W_t = 0$である．ただし$\max_{i}\|W_{t_i} - W_{t_{i-1}}\| \rightarrow 0$は，$W_t$の一様連続性からなる．\textcolor{red}{ブラウン運動の定義には一様連続性はなかったから，本当はいらない？}
+
+    $\mathrm{d}W_t\mathrm{d}W'_t = 0$については後ほど示す．
+\end{proof}
+
+ここで以下の性質を示す．
+
+\begin{prop}
+    $W_t^2 - t$はマルチンゲール．
+\end{prop}
+\begin{proof}
+    \begin{align*}
+        \mathrm{E}\left[W_t^2 - t \mid \mathscr{F}_s\right] &= \mathrm{E}\left[\left\{(W_t - W_s) + W_s\right\}^2 - t\right]\\
+        &= \mathrm{E}\left[(W_t - W_s)^2 + 2(W_t - W_s)W_s + W_s^2 - t \mid \mathscr{F}_s\right]\\
+        &= \mathrm{E}\left[(W_t - W_s)^2\right] + 2W_s\mathrm{E}\left[W_t - W_s\right] + W_s^2 - t\\
+        &= t - s + W_s^2 - t = W_s^2 - s
+    \end{align*}
+\end{proof}
+
+この命題から，任意のマルチンゲールとその2次変分についても同じような性質が成り立っていて欲しい気持ちになる．実際，次節のDoob分解という事実が知られている．
+
+\subsubsection{2次変分の定義}
+\begin{fact}[Doob分解]
+    $M$を連続$L^2$マルチンゲールとする．この時ある確率過程$A$が（識別不能の意味で）一意に存在して，以下の３つの条件を満たす．
+    \begin{enumerate}
+        \item $A_t$は$\mathscr{F}_t$-可測.
+        \item 任意の$\omega\in\Omega$に対して，$A_0 = 0$, 単調増加，連続である．
+        \item $M_t^2 - A_t$がマルチンゲール
+    \end{enumerate}
+\end{fact}
+Doob分解における$A$を$M$の2次変分と定義し，$\langle M, M\rangle_t$と書き表す．
+\textcolor{red}{これより前の$\mathrm{d}W_t\mathrm{d}W_t=\mathrm{d}t$の議論はあくまで直感を得るためのものであり，2次変分の直接の定義ではないことに注意！}
+
+さらに以下の事実が成立する．
+\begin{fact}
+    $[0, t]$の分割$\Delta$に対して，$\|\Delta\|\rightarrow 0$で$\langle M, M\rangle_t^{\Delta} \rightarrow \langle M, M\rangle_t$ (確率収束)が成り立つ．
+\end{fact}
+例えば$\langle W, W\rangle_t^{\Delta} \overset{P}{\rightarrow} t$である．\textcolor{red}{この事実より，マルチンゲールの分割に対する2次変分の収束値が計算できれば，それがそのマルチンゲールの2次変分であることがわかる．}
+
+さらにこの2次変分の定義には拡張版が存在する（連続セミマルチンゲールまで）．
+
+続いて相異なる２つのマルチンゲールの2次変分に対する事実を述べる．
+\begin{fact}
+    $\langle M, N\langle_t = \frac{1}{2}\left(\langle M+N, M+N\rangle - \langle M, N\rangle - \langle N, M\rangle\right)$とすると，$MN - \langle M, N\rangle_t$はマルチンゲールとなる．さらに$\|\Delta\|\rightarrow 0$で
+    $$\langle M, N\rangle_t^{\Delta} \rightarrow \langle M, N\rangle$$
+    となる．ただし$\langle M, N\rangle_t^{\Delta} := \sum_{\Delta}(M_{t_i} - M_{t_{i-1}})(N_{t_i} - N_{t_{i-1}})$である．\par
+    さらに$\langle M, N\rangle$は次を満たす識別不能の意味で一意な$B_t$である:
+    \begin{enumerate}
+        \item $B_t$は$\mathscr{F}_t$可測
+        \item 任意の$\omega\in\Omega$で$B_0 = 0$，局所有界変動，連続である．
+        \item $MN - B$はマルチンゲール．
+    \end{enumerate}
+    さらに$\langle M, N\rangle$は対称双線型的（つまり内積と同じ性質を持つ）で，$\langle M, M\rangle \equiv 0 \iff M \equiv N$である．
+\end{fact}
+以上の事実を元に，命題\ref{prop:nijihenbun_all}の最後の証明を行う
+\begin{proof}
+    \begin{align*}
+        \langle W, W' \rangle &= \frac{1}{2} \left(\langle W + W', W + W'\rangle - \langle W, W\rangle - \langle W', W'\rangle\right)\\
+        &= \frac{1}{2}\left(\langle\sqrt{2}\frac{W + W'}{\sqrt{2}}, \sqrt{2}\frac{W + W'}{\sqrt{2}}\rangle - t - t\right)\\
+        &= 0
+    \end{align*}
+    ただし$\frac{W+W'}{\sqrt{2}}$もブラウン運動であることを用いた．
+\end{proof}
+\subsubsection{ブラウン運動の例}
+
+\subsection{反射原理}
+ここではブラウン運動の反射原理を示す．反射原理はブラウン運動の最大値の密度関数を求めたり，それに伴ってバリアオプションのようなデリバティブの時価評価に用いられたりする．反射原理を記述するために，まずは停止時刻や到達時刻を定義する．
+
+\subsubsection{停止時刻}
+$(\Omega, \mathscr{F}, P, \left(\mathscr{F}_t\right))$をフィルトレーション付き確率空間とする．
+
+\begin{dfn}[停止時刻]
+    $T: \Omega \rightarrow [0, \infty]$が$\mathscr{F}_t$停止時刻であるとは,
+    $$^\forall t \geq 0, \left\{T \leq t\right\} \in \mathscr{F}_t$$
+    であることを言う．\par
+    この時，$\mathscr{F}_T := \left\{A\in \mathscr{F}_t \mid ^\forall t \geq 0, A\cap \left\{T \leq t\right\} \in \mathscr{F}_t\right\}$
+    を（停止）時刻$T$での情報系という．
+\end{dfn}
+この停止時刻の情報系の由来はのちに述べる任意抽出定理のところで議論する．\par
+この停止時刻の解釈についてであるが，ここではランダムな時刻$T: \Omega \rightarrow [0, \infty]$を考えたいというモチベーションが始まりである．特に，そのランダムな時刻が時刻$t$であるかどうかは時刻$t$になって時点では確定していて欲しい（未来の情報を使わずに決めることができる）という要請がある．これは停止時刻に課された条件の意味である．\par
+例えば所持金が初めて$1$万円をわる時刻$T$というのはランダムである一方で，各時刻$t$において瞬時に$T= t$であるかどうかは判定される．これは停止時刻となる．以下に停止時刻の例を述べる．
+
+\begin{itemize}
+    \item 定数時刻 $T\equiv s$.
+    \item $T, S$がそれぞれ停止時刻であるならば$T\land S$も停止時刻
+    \item $F\subset \mathbb{R}$が閉集合で，$X_t$が連続過程である場合，$H := \inf\{t \geq 0 \mid X_t \in F\}$は停止時刻．
+\end{itemize}
+\textcolor{red}{余裕があれば証明をつける}
+
+\begin{thm}[任意抽出定理]
+    $X$をマルチンゲール（右連続），$S, T$を有界な停止時刻で$S\leq T$とする．（ある定数$M$が存在して$S, T\leq M$）
+    この時，
+    $$
+        \mathrm{E}\left[X_T \mid \mathscr{F}_S\right] = X_S
+    $$
+    が成り立つ．ただし$X_T: \Omega \rightarrow \mathbb{R}, \omega \mapsto X_{T(\omega)}(\omega) 1_{T \neq \infty}(\omega)$である．
+\end{thm}
+また以下の事実も成立する．
+\begin{itemize}
+    \item $X_t$が$\mathscr{F}_t$可測である時，$X_T$は$\mathscr{F}_T$可測である．
+    \item $X$が連続かつ$\mathscr{F}$適合である時，$T$で停止した確率過程$X_t^T := X_{t\land T}$は連続かつ$\mathscr{F}$適合である．
+    \item $X$が右連続マルチンゲールならば$X^T$も右連続マルチンゲールである．これは以下で確かめられる．
+            \begin{align*}
+                \mathrm{E}\left[X_t^T \mid \mathscr{F}_s\right] &= \mathrm{E}\left[X_{T\land t} \mid \mathscr{F}_s\right]\\
+                &= X_{T\land s} = X^T_s
+            \end{align*}
+            ただし，2個目の等号は任意抽出定理から従う．
+\end{itemize}
+
+\subsubsection{反射定理}
+\begin{thm}
+    $W$をブラウン運動，$T_a := \inf\{t\geq \mid W_t = a\}$とする．$T_a$は到達時刻と呼ばれる．
+    この時，$0 \leq b \leq a$に対して，
+    $$
+        \mathrm{P}\left(T_a \leq t, W_t \leq b\right) = \mathrm{P}\left(W_t \geq 2a - b\right)
+    $$
+    が成立する．
+\end{thm}
+\begin{proof}
+    \begin{align*}
+        \mathrm{P}\left(T_a \leq t, W_t \leq b\right) &= \mathrm{P}\left(T_a \leq t, W_{t} - a \leq b - a\right)\\
+        &= \mathrm{P}\left(T_a \leq t, W_{t}-W_{T_a} \geq a - b\right)\\
+        &= \mathrm{P}\left(T_a \leq t, W_{t} \geq 2a - b\right)\\
+        &= \mathrm{P}\left(W_{t} \geq 2a - b\right)
+    \end{align*}
+    ここで，２つ目の等号は強マルコフ性からきている．
+\end{proof}
+ここで$S_t := \sup_{0 \leq s \leq t} W_s$とすると，$T_a \leq t \iff S_t \geq a$と反射原理より
+$$
+    \mathrm{P}\left(S_t \geq a, W_t \leq b\right) = \mathrm{P}\left(W_{t} \geq 2a - b\right)
+$$
+を得る．この右辺を$a, b$で偏微分する事で$S_t$の密度関数を得ることができる．\par
+\textcolor{red}{疑問: $P(\left\{T_a \leq t, B_{t - T_a} \geq a - b\right\})$と$P(\left\{T_a \leq t, B_{t - T_a} \leq b - a\right\})$は自明に等しいわけではない？}\par
+
+\noindent
+\textbf{課題:実際に偏微分して密度関数を求めよう！}
+\end{document}

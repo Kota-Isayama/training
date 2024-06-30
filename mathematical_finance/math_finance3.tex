@@ -1,0 +1,92 @@
+\documentclass{jsarticle}
+
+
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+
+\title{数理ファイナンス3}
+\author{諌山航太}
+
+
+\usepackage{amsthm}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{prop}[dfn]{Proposition}
+\newtheorem{lem}[dfn]{補題}
+\newtheorem{thm}[dfn]{Theorem}
+\newtheorem{cor}[dfn]{Corollary}
+\newtheorem{rem}[dfn]{Remark}
+% \newtheorem*{rem*}[dfn]{Remark}
+\newtheorem{fact}[dfn]{Fact}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\begin{document}
+\maketitle
+
+\subsection{確率微分方程式(Stochastic differential equation, SDE)}
+確率微分方程式はある確率空間$(\Omega, \mathscr{F}, P, (F_t))$における以下の形の方程式である:
+\begin{equation*}
+    X_t - X_0 = \int_0^t \mu(s, X_s)\mathrm{d}s + \int_0^t \sigma(s, X_s) \mathrm{d}W_s.
+\end{equation*}
+また，以下のように微分形で書き表されることも多い．
+\begin{equation*}
+    \mathrm{d}X_t = \mu(t, X_t)\mathrm{d}t + \sigma(t, X_t) \mathrm{d}W_t.
+\end{equation*}
+
+\textcolor{red}{確率微分方程式は確率測度を一つ固定した上で考えるものであることに注意する．}
+
+\paragraph{確率微分方程式の解の種類}
+確率微分方程式には２つの種類の解が存在する．
+\begin{itemize}
+    \item （弱い）解: $(\mathscr{F}_t)$-適合な解
+    \item （強い）解: $\Tilde{\mathscr{F}}_t^W$-適合な解．ここで$\Tilde{\mathscr{F}}_t^W$は$W$によって生成されるフィルトレーションを指す．
+\end{itemize}
+ただし，この講義においてはこの解の区別はしないし，多分実務でも気にしていない．
+
+\paragraph{Lipschitz条件}確率微分方程式の解の存在条件としてLipschitz条件が知られている．
+\begin{prop}[Lipschitz条件]
+    以下の条件を満たすと強い解が一意的に存在する．
+    \begin{itemize}
+        \item $\mu, \sigma$が連続
+        \item $^\exists K \text{s.t.} ^\forall t, x, y,\quad |\mu(t, x) - \mu(t, y)| \leq K|x-y|,\quad |\sigma(t, x) - \sigma(t, y)| \leq K|x-y|$
+    \end{itemize}
+\end{prop}
+
+\subsubsection{Black-Scholes型のSDE}
+以下の形のSDEをBlack-Scholes型のSDEという:
+\begin{equation*}
+    \frac{\mathrm{d}X_t}{X_t} = \mu_t \mathrm{d}t + \sigma_t\mathrm{d}W_t.
+\end{equation*}
+ただし$X_0 \in \mathbb{R}$，$\mu, \sigma$は確定的．また，$X_t$の存在はLipschitz条件により保証されているとする（そういう$\mu, \sigma$だとしている）．
+これを満たす$X_t$を求めてみよう．唐突ではあるが，$\log(X_t)$を考えると
+\begin{align*}
+    \mathrm{d}\log X_t &= \frac{\mathrm{d}X_t}{X_t} - \frac{\mathrm{d}X_t\mathrm{d}X_t}{2X_t^2}\\
+    &= (\mu_t - \frac{1}{2}\sigma_t^2)\mathrm{d}t + \sigma_t\mathrm{d}W_t
+\end{align*}
+であるから，
+\begin{gather*}
+    \log{X_t} - \log{X_0} = \int_0^t(\mu_s - \frac{1}{2}\sigma_s^2)\mathrm{d}s + \int_0^t\sigma_s\mathrm{d}W_s\\
+    X_t = X_0 \exp{\left\{\int_0^t(\mu_s - \frac{1}{2}\sigma_s^2)\mathrm{d}s + \int_0^t\sigma_s\mathrm{d}W_s\right\}}
+\end{gather*}
+を得る．
+
+\paragraph{平均}
+この$X_t$の平均を計算してみる．$X_0$や$\exp{\left\{exp{\left\{\int_0^t(\mu_s - \frac{1}{2}\sigma_s^2)\mathrm{d}s\right\}}\right\}}$が確定的であることと，確率積分の性質として$\left\{\int_0^t\sigma_s\mathrm{d}W_s\right\}$が正規分布$\mathcal{N}(0, \int_0^t \sigma^2_s \mathrm{d}s)$に従うことを用いると，
+\begin{align*}
+    \mathrm{E}\left[X_t\right] &= \mathrm{E}\left[X_0 \exp{\left\{\int_0^t(\mu_s - \frac{1}{2}\sigma_s^2)\mathrm{d}s + \int_0^t\sigma_s\mathrm{d}W_s\right\}}\right]\\
+    &= X_0 \exp{\left\{\int_0^t \mu_s \mathrm{d}s\right\}}
+\end{align*}
+であることがわかる．$X_t$の変化量が平均的に単位時間あたり$\mu_t$だけ増加することと整合が取れていることに注目されたい．
+
+\paragraph{分散}
+素直に計算してみる．
+\end{document}

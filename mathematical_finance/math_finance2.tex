@@ -1,0 +1,230 @@
+\documentclass{jsarticle}
+
+
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+
+\title{数理ファイナンス2}
+\author{諌山航太}
+
+
+\usepackage{amsthm}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{prop}[dfn]{Proposition}
+\newtheorem{lem}[dfn]{補題}
+\newtheorem{thm}[dfn]{Theorem}
+\newtheorem{cor}[dfn]{Corollary}
+\newtheorem{rem}[dfn]{Remark}
+% \newtheorem*{rem*}[dfn]{Remark}
+\newtheorem{fact}[dfn]{Fact}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\begin{document}
+\maketitle
+
+\subsection{確率積分}
+この節では，確率積分を定め，その性質を見ていく．まずはじめに確率積分に要請したい性質を直感的な議論で考察する．続いて，いくつかの知られている事実を元に確率積分を定める．最後に伊藤積分で最重要とも言える伊藤の補題を述べる．
+
+\subsubsection{確率積分に備わっていて欲しい性質}
+この項を通じて$H$を連続適合過程（$H_t$が$\mathscr{F}_t$可測）であるとし，$W$を$\mathscr{F}_t$ブラウン運動とする．
+
+\paragraph{確率積分と通常の積分の違い}
+今から，$H$を積分したような$\int_0^t H_s \mathrm{d}W_s$なる確率変数を定めたい．まずはじめに思いつく素朴な方法として，Lebesgue-Stieltjes積分として定める方法が思いつく．これは，$\omega\in \Omega$を固定して，$H_{\cdot}(\omega): [0, \infty] \rightarrow \mathbb{R}, s \mapsto H_s(\omega)$や$W_{\cdot}(\omega): [0, \infty] \rightarrow \mathbb{R}, s \mapsto W_s(\omega)$という通常の関数を考える．この時
+$$
+    \sum_{i=1}^{n}H_{t_i}(\omega)\left(W_{t_{i+1}}(\omega) - W_{t_i}(\omega)\right)
+$$
+の$\|\Delta\| \rightarrow 0$の極限の形で確率積分を定めようするものである．これはうまくいかないことが知られている．これは$W$が有界変動でない（\textcolor{red}{なんだろう}）でないことが理由である．そこで，これからは積分を定める別の方法を考えていく．\par
+
+\paragraph{確率積分の定め方（非厳密）}$\Delta: 0 = t_0 < t_1 < \dots < t_n = t$を$[0, t]$の分割とする．この時，２つの和を考えてみる．
+\begin{gather*}
+    A_t^{\Delta} := \sum_{i=1}^{n}H_{t_{i-1}}\left(W_{t_i} - W_{t_{i-1}}\right)\\
+    B_t^{\Delta} := \sum_{i=1}^{n}H_{t_{i}}\left(W_{t_i} - W_{t_{i-1}}\right)
+\end{gather*}
+この２つの量は，積分するときの代表点をそれぞれ別の点で取ったようなものになっている．実はこれらは同じ値には収束しないことが以下のことからわかる．$H=W$のとき
+\begin{align*}
+    B_t^{\Delta} - A_t^{\Delta} = \sum_{i=1}^{n}(H_{t_i} - H_{t_{i-1}})(W_{t_i} - W_{t_{i-1}}) = \langle W, W \rangle_t^{\Delta} \rightarrow t
+\end{align*}
+つまり，代表点の取り方によって値が変わる．さらに$H=W$の場合の$A, B$のそれぞれの値を求めてみる．
+\begin{align*}
+    B_t^\Delta + A_t^\Delta &= \sum_{i=1}^{n}(H_{t_i} + H_{t_{i-1}}) \left(W_{t_i} - W_{t_{i-1}}\right)\\
+    &= \sum_{i=1}^n \left(W_{t_i}^2 - W_{t_{i-1}}^2\right)\\
+    &= W_t^2
+\end{align*}
+であるから，
+$$
+    A_t^\Delta = \frac{1}{2}\left(W_t^2 - t\right), \quad B_t^\Delta = \frac{1}{2}\left(W_t^2 + t\right)
+$$
+を得る．$A_t^\Delta$はマルチンゲールである（Doob分解を参照）ので，$A_t$の方を確率積分の定義としたいというモチベーションが生じる．では，ブラウン運動以外の確率過程も同様の性質が成り立つ（ように見える）だろうか？\par
+
+以下の議論は厳密ではないことに注意すること．$H$をブラウン運動とは限らない確率過程とし，分割を$0=t_0 < t_1 < \dots < t_k = s < \dots < t_n = t$とする．このとき，
+\begin{align*}
+    \mathrm{E}\left[A_t^\Delta \mid \mathscr{F}_s\right] &= \mathrm{E}\left[\sum_{i=1}^n H_{t_{i-1}}(W_{t_i} - W_{t_{i-1}})\mid \mathscr{F}_s\right]\\
+    &= \sum_{i=1}^{k}H_{t_{i-1}}(W_{t_i} - W_{t_{i-1}}) + \sum_{i=k+1}^n \mathrm{E}\left[H_{t_{i-1}}(W_{t_i} - W_{t_{i-1}})\mid \mathscr{F}_s\right]\\
+    &= A_s^\Delta + \sum_{i=k+1}^n\mathrm{E}\left[\mathrm{E}\left[H_{t_{i-1}}(W_{t_i} - W_{t_{i-1}}) \mid \mathscr{F}_{t_{i-1}} \right] \mid \mathscr{F}_s\right]\\
+    &= A_s^\Delta
+\end{align*}
+となるので，マルチンゲールとなる（ように見える）．ただし，3個目の等号はtower propertyであり，4個目の等号は条件付き期待値の括りだしとブラウン運動の定常正規性から従う．\par
+
+以上の情報から，確率積分の定義の仕方は$A$の定式化を拡張した形で定義することを後ほど考える．
+
+\paragraph{伊藤の等長性}
+唐突ではあるが，$A$は以下の性質を満たす.
+\begin{align*}
+    \mathrm{E}\left[(A_t^\Delta)^2\right] &= \mathrm{E}\left[\sum_{i}\sum_{j} H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\right]\\
+    &= \sum_{i}\mathrm{E}\left[H_{t_{i-1}}^2(W_{t_i} - W_{t_{i-1}})^2\right] + 2 + \sum_{i>j}\mathrm{E}\left[H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\right]\\
+\end{align*}
+ここで
+\begin{align*}
+    \mathrm{E}\left[H_{t_{i-1}}^2(W_{t_i} - W_{t_{i-1}})^2\right] &= \mathrm{E}\left[\mathrm{E}\left[H_{t_i}^2(W_{t_i} - W_{t_{i-1}})^2\mid \mathscr{F}_{t_{i-1}}\right]\right]\\
+    &= \mathrm{E}\left[H_{t_{i-1}}^2(t_i - t_{i-1})\right]
+\end{align*}
+かつ
+\begin{align*}
+    &\quad\mathrm{E}\left[H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\right] \\
+    &= \mathrm{E}\left[\mathrm{E}\left[H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\mid \mathscr{F}_{t_{i-1}}\right]\right]\\
+    &= \mathrm{E}\left[H_{t_{i-1}}H_{t_{j-1}} (W_{t_j} - W_{t_{j-1}})\mathrm{E}\left[(W_{t_i}-W_{t_{i-1}})\mid \mathscr{F}_{t_{i-1}}\right]\right]\\
+    &= 0
+\end{align*}
+である．よって
+\begin{align*}
+    \mathrm{E}\left[(A_t^\Delta)^2\right] = \sum_{i}\mathrm{E}\left[H_{t_{i-1}}^2(t_i - t_{i-1})\right] = \mathrm{E}\left[\int_0^t H^2_s \mathrm{d}s\right]
+\end{align*}
+となる．これは伊藤の等長性と呼ばれる性質である．ここでは$A_t^\Delta$が伊藤の等長性を満たすということしか言えていないが，これから定める予定の確率積分$\int_0^t H_t\mathrm{d}W_s$もこの性質を満たしておいてほしいという気持ちになる．\par
+ちなみにこの伊藤の等長性の名前の意味であるが，$\mathrm{E}\left[\left(\int_0^t H_t\mathrm{d}W_s\right)^2\right]$は$\int_0^t H_t\mathrm{d}W_s$を自乗可積分空間$L^2(\Omega, P)$の元と見た時の$\int_0^t H_t\mathrm{d}W_s$のノルムを表し，$\mathrm{E}\left[\int_0^t H^2_s \mathrm{d}s\right]$は$H_t$を$L^2([0, t])$の元と見た時のノルムを表すことからきている．$H\mapsto \int_0^t H_s\mathrm{d}W_s$が等長写像であるということである．
+
+\paragraph{連続性} $\int_0^tH_s\mathrm{d}W_s$は積分のようなものとして定めたいので，連続過程であってほしい．
+
+\paragraph{２次変分} $A_t^\Delta$の２次変分を計算してみる．実は$\int_0^tH^2_s\mathrm{d}s$が２次変分であることが以下の計算からわかる．\par
+$\Delta = 0 = t_0 < t_1 < \dots < t_k = s < \dots t_n = t$として，以下を定める．
+\begin{gather*}
+    X_t^\Delta = \sum_{i=1}^{n}H_{t_{i-1}}^2 (t_i - t_{i-1})\\
+    X_s^\Delta = \sum_{i=1}^{k}H_{t_{i-1}}^2 (t_i - t_{i-1})
+\end{gather*}
+
+マルチンゲール$M$の２次変分が$A$であることの条件に$M^2 - A$がマルチンゲールであることがあった．$(A_t^\Delta)^2 - X_t^\Delta$がマルチンゲールであることを確かめてみる．
+\begin{align*}
+    &\quad\mathrm{E}\left[(A_t^\Delta)^2 - X_t^\Delta \mid \mathscr{F}_s\right]\\
+    &= \mathrm{E}\left[\sum_{i}\sum_{j} H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}}) - \sum_{i=1}^{n}H_{t_{i-1}}^2 (t_i - t_{i-1})\mid\mathscr{F}_s\right]\\
+    &= \sum_{i}\mathrm{E}\left[H_{t_{i-1}}^2\left((W_{t_i}-W_{t_{i-1}})^2 - (t_i - t_{i-1})\right)\mid\mathscr{F}_{t_k}\right] + 2\sum_{i>j}\mathrm{E}\left[H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\mid\mathscr{F}_{t_k}\right]
+\end{align*}
+
+ここで
+\begin{align*}
+    \mathrm{E}\left[H_{t_{i-1}}^2\left((W_{t_i}-W_{t_{i-1}})^2 - (t_i - t_{i-1})\right)\mathscr{F}_s\right] = \begin{cases}
+        H_{t_{i-1}}^2\left((W_{t_i}-W_{t_{i-1}})^2 - (t_i - t_{i-1})\right) & (i \leq k)\\
+        0 & (i > k)
+    \end{cases}
+\end{align*}
+は伊藤の等長性のところの計算からすぐにわかる．続いて
+\begin{align*}
+    \mathrm{E}\left[H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\right] = 
+    \begin{cases}
+        H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}}) & (i \leq k)\\
+        0 & (i > k)
+    \end{cases}
+\end{align*}
+であることも，伊藤の等長性のところの計算からわかる．従って，
+\begin{align*}
+    &\quad\mathrm{E}\left[(A_t^\Delta)^2 - X_t^\Delta \mid \mathscr{F}_s\right] \\
+    &= \sum_{i=1}^k H_{t_{i-1}}^2\left((W_{t_i}-W_{t_{i-1}})^2 - (t_i - t_{i-1})\right) \\
+    &\qquad + 2\sum_{k \geq i > j}H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}})\\
+    &= \sum_{i=1}^k\sum_{j=1}^k H_{t_{i-1}}H_{t_{j-1}}(W_{t_i}-W_{t_{i-1}}) (W_{t_j} - W_{t_{j-1}}) - \sum_{i=1}^{k}H_{t_{i-1}}^2 (t_i - t_{i-1})\\
+    &= (A_s^\Delta)^2 - X_s^\Delta
+\end{align*}
+を得る．これは$X$が２次変分であることを意味している．このことから，確率積分$\int_0^tH_s\mathrm{d}W_s$２次変分が$\int_0^t H_s^2\mathrm{d}s$であるという要請が生まれる．
+
+\subsubsection{確率積分の定義}
+この項では，前項で見てきた確率積分に満たしていて欲しい条件を実際に満たすような確率過程が一意に存在する事実を述べ，確率積分を定める．
+\begin{fact}[確率積分]
+    $t\in[0, \infty)$, $H$: 連続適合過程かつ$\int_0^T H_s^2\mathrm{d}s < \infty$であると仮定する．また$W$を$\mathscr{F}_t$ブラウン運動とする．
+    この時確率過程$(M_t)_{0\leq t\leq T}$が識別不能を除いて一意に存在して，
+    \begin{itemize}
+        \item $M$は連続適合過程かつ$L^2$マルチンゲールである
+        \item $\sum_{i=1}^n H_{t_{i-1}}(W_{t_i} - W_{t_{i-1}}) \overset{P}{\rightarrow} M_t \quad (\|\Delta\|\rightarrow 0)$
+    \end{itemize}
+    を満たす．さらにこの時，$\langle M\rangle_t = \int_0^t H_s^2\mathrm{d}s$が存在し，この系として
+    $$
+        \mathrm{E}\left[M_t^2\right] = \mathrm{E}\left[\int_0^t H_s^2\mathrm{d}s\right]
+    $$
+    が成り立つ．この$M$を確率積分といい，$M_t = \int_0^tH_s\mathrm{d}W_s$と書く．
+\end{fact}
+
+\textbf{本当はブラウン運動$W$以外に対しても，確率積分を定めることができる．}
+
+\begin{prop}[確率積分の性質]
+    $\int_0^t H_s\mathrm{d}W_s$の平均は$0$，分散は$\mathrm{E}\left[\int_0^tH_s^2\mathrm{d}s\right]$である．また共分散は
+    $$
+        \mathrm{Cov}\left(\int_0^tH_s\mathrm{d}W_s, \int_0^tH_s\mathrm{d}W_s\right) = \mathrm{E}\left[\int_0^tH_sK_s\mathrm{d}s\right]
+    $$
+    となる．また，$H$が決定的であるときは，$\int_0^t h(s)\mathrm{d}W_s \sim \mathcal{N}\left(0, \mathrm{E}\left[\int_0^t h^2(s) \mathrm{d}s\right]\right)$である．
+\end{prop}
+
+
+\subsubsection{伊藤の補題}
+この項では，通常の解析学におけるチェインルールに相当する，伊藤の補題を述べる．
+
+\begin{lem}[伊藤の補題]
+    $f: \mathbb{R}^n\rightarrow \mathbb{R}$を$C^2$級関数，$X^i$を$\mathscr{F}_t$適合な連続セミマルチンゲールとする．このとき
+    \begin{align*}
+        &\quad f(X_t^1, \ldots, X_t^n) \\
+        &= f(X_0^1, \ldots, X_0^n) + \sum_i\int_0^t \frac{\partial f}{\partial x_i}(X_s^1, \ldots, X_s^n) dX_s^i + \frac{1}{2}\sum_i\sum_j \int_0^t \frac{\partial^2 f}{\partial x_i \partial x_j} (X_s^1, \ldots, X_s^n) \mathrm{d}\langle X^i,X^j\rangle _s
+    \end{align*}
+    が成立する．これを伊藤の補題の積分形と呼ぶ．この微分形として
+    \begin{align*}
+        &\quad df(X_t^1, \ldots, X_t^n) = \sum_i \frac{\partial f}{\partial x_i}(X_t^1, \ldots, X_t^n) \mathrm{d}X_t^i + \frac{1}{2}\sum_i\sum_j \frac{\partial^2 f}{\partial x_i \partial x_j} (X_t^1, \ldots, X_t^n) \mathrm{d}X_t^i \mathrm{d}X_t^j
+    \end{align*}
+    を用いて表現することもある．ただし，積分形が数学的に意味がある形であり，微分形は積分形の略記法であることに注意する．
+\end{lem}
+
+\paragraph{計算例} ここでは伊藤の補題を用いた計算例を述べる．\par
+\noindent
+\textbf{(1):} $f(x) = x^n$の場合．\par
+$$
+    \mathrm{d}f(X_t) = nX_t^{n-1}\mathrm{d}X_t + n(n-1)X_t^{n-2}\mathrm{d}X_t\mathrm{d}X_t
+$$
+である．さらに具体的に$f(x) = x^2$，$X=W$の場合を考えてみると
+\begin{align*}
+    \mathrm{d}(W_t^2) &= 2W_t\mathrm{d}W_t + \mathrm{d}t
+\end{align*}
+であるから
+\begin{gather*}
+    W_t^2 = 2\int_0^tW_s\mathrm{d}W_s + t\\
+    \int_0^tW_s\mathrm{d}W_s = \frac{1}{2}\left(W_t^2 - t\right)
+\end{gather*}
+を得る．\par
+
+\noindent
+\textbf{(2):} $f(x) = \exp{(x)}$の場合．
+$$
+    \mathrm{d}f(X_t) = \exp{(X_t)}\mathrm{d}X_t + \frac{1}{2}\exp{(X_t)}
+$$
+
+\noindent
+\textbf{(3):} $f(x) = \log{x}$の場合．
+$$
+    \mathrm{d}f(X_t) = \frac{\mathrm{d}X_t}{X_t} - \frac{\mathrm{d}X_t\mathrm{d}X_t}{2X_t^2}
+$$
+
+\noindent
+\textbf{(4):} $f(x, y) = xy$の場合．
+$$
+    \mathrm{d}f(X_t, Y_t) = Y_t\mathrm{d}X_t + X_t\mathrm{d}Y_t + \mathrm{d}X_t\mathrm{d}Y_t．
+$$
+
+\noindent
+\textbf{(5):} $f(x) = \frac{1}{x}$の場合．
+$$
+    \mathrm{d}f(X_t) = -\frac{\mathrm{d}X_t}{X_t^2} + \frac{\mathrm{d}X_t\mathrm{d}X_t}{X_t^3}
+$$
+
+\end{document}
