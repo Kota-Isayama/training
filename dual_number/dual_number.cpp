@@ -25,7 +25,7 @@ namespace trainlib {
         return *this;
     }
 
-    DualNumber1d& DualNumber1d::operator=(const DualNumber1d&& other) {
+    DualNumber1d& DualNumber1d::operator=(DualNumber1d&& other) {
         *this = other;
 
         return *this;
@@ -113,4 +113,216 @@ namespace trainlib {
     }
 
 
+    DualNumber::DualNumber(std::size_t dim): dim(dim), ptr(std::make_unique<DualNumber1d[]>(dim)) {}
+    DualNumber::DualNumber(const DualNumber& other): dim(dim) {
+        ptr = std::make_unique<DualNumber1d[]>(dim);
+        for (std::size_t i = 0; i < dim; ++i) {
+            ptr[i] = other[i];
+        }
+    }
+    DualNumber::DualNumber(DualNumber&& other): dim(dim), ptr(std::move(other.ptr)) {}
+    
+    DualNumber DualNumber::operator+() const {
+        return *this;
+    }
+
+    DualNumber DualNumber::operator-() const {
+        DualNumber answer{this->dim};
+        for (std::size_t i = 0; i < this->dim; ++i) {
+            answer[i] = -(*this)[i];
+        }
+        return answer;
+    }
+
+    DualNumber& DualNumber::operator=(const DualNumber& other) {
+        if (this->dim != other.dim) {
+            this->ptr = std::make_unique<DualNumber1d[]>(other.dim);
+        }
+
+        this->dim = other.dim;
+        for (std::size_t i = 0; i < other.dim; ++i) {
+            (*this)[i] = other[i];
+        }
+
+        return *this;
+    }
+
+    DualNumber& DualNumber::operator=(DualNumber&& other) {
+        this->dim = other.dim;
+        this->ptr = std::move(other.ptr);
+
+        return *this;
+    }
+
+    DualNumber& DualNumber::operator+=(const DualNumber& other) {
+        if (this->dim != other.dim) {
+            throw std::runtime_error("Invalid input: two DualNumber shoud be same dimension.");
+        }
+
+        for (std::size_t i = 0; i < this->dim; ++i) {
+            (*this)[i] += other[i];
+        }
+
+        return *this;
+    }
+
+    DualNumber& DualNumber::operator-=(const DualNumber& other) {
+        if (this->dim != other.dim) {
+            throw std::runtime_error("Invalid input: two DualNumber shoud be same dimension.");
+        }
+
+        for (std::size_t i = 0; i < this->dim; ++i) {
+            (*this)[i] -= other[i];
+        }
+
+        return *this;
+    }
+
+    DualNumber& DualNumber::operator*=(const double& other) {
+        for (std::size_t i = 0; i < this->dim; ++i) {
+            (*this)[i] *= other;
+        }
+
+        return *this;
+    }
+
+    DualNumber& DualNumber::operator/=(const double& other) {
+        for (std::size_t i = 0; i < this->dim; ++i) {
+            (*this)[i] /= other;
+        }
+
+        return *this;
+    }
+
+    bool operator==(const DualNumber& lhs, const DualNumber& rhs) {
+        if (lhs.dim != rhs.dim) {
+            return false;
+        }
+
+        for (std::size_t i = 0; i < lhs.dim; ++i) {
+            if (lhs[i] != rhs[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool operator!=(const DualNumber& lhs, const DualNumber& rhs) {
+        return !(lhs == rhs);
+    }
+	
+    DualNumber operator+(const DualNumber& lhs, const DualNumber& rhs) {
+        if (lhs.dim != rhs.dim) {
+            throw std::runtime_error("Invalid input: two DualNumber shoud be same dimension.");
+        }
+
+        auto answer = DualNumber{lhs.dim};
+
+        for (std::size_t i = 0; i < lhs.dim; ++i) {
+            answer[i] = lhs[i] + rhs[i];
+        }
+
+        return answer;
+    }
+
+	DualNumber operator+(const DualNumber& lhs, DualNumber&& rhs) {
+        if (lhs.dim != rhs.dim) {
+            throw std::runtime_error("Invalid input: two DualNumber shoud be same dimension.");
+        }
+
+        auto answer = std::move(rhs);
+
+        for (std::size_t i = 0; i < lhs.dim; ++i) {
+            answer[i] = lhs[i] + rhs[i];
+        }
+
+        return answer;
+    }
+
+	DualNumber operator+(DualNumber&& lhs, const DualNumber& rhs) {
+        return rhs + lhs;
+    }
+
+	DualNumber operator+(DualNumber&& lhs, DualNumber&& rhs) {
+        return std::move(lhs) + rhs;
+    }
+
+	DualNumber operator-(const DualNumber& lhs, const DualNumber& rhs) {
+        if (lhs.dim != rhs.dim) {
+            throw std::runtime_error("Invalid input: two DualNumber shoud be same dimension.");
+        }
+
+        auto answer = DualNumber{lhs.dim};
+
+        for (std::size_t i = 0; i < lhs.dim; ++i) {
+            answer[i] = lhs[i] - rhs[i];
+        }
+
+        return answer;
+    }
+
+	DualNumber operator-(const DualNumber& lhs, DualNumber&& rhs) {
+        if (lhs.dim != rhs.dim) {
+            throw std::runtime_error("Invalid input: two DualNumber shoud be same dimension.");
+        }
+
+        auto answer = std::move(rhs);
+
+        for (std::size_t i = 0; i < lhs.dim; ++i) {
+            answer[i] = lhs[i] - rhs[i];
+        }
+
+        return answer;
+    }
+
+	DualNumber operator-(DualNumber&& lhs, const DualNumber& rhs) {
+        return rhs - lhs;
+    }
+
+	DualNumber operator-(DualNumber&& lhs, DualNumber&& rhs) {
+        return std::move(lhs) - rhs;
+    }
+
+	DualNumber operator*(const double& lhs, const DualNumber& rhs) {
+        auto answer = rhs;
+        for (std::size_t i = 0; i < rhs.dim; ++i) {
+            answer[i] = lhs * rhs[i];
+        }
+
+        return answer;
+    }
+
+	DualNumber operator*(const DualNumber& lhs, const double& rhs) {
+        return rhs * lhs;
+    }
+
+	DualNumber operator*(const double& lhs, DualNumber&& rhs) {
+        auto answer = std::move(rhs);
+        for (std::size_t i = 0; i < rhs.dim; ++i) {
+            answer[i] = lhs * rhs[i];
+        }
+
+        return answer;
+    }
+
+	DualNumber operator*(DualNumber&& lhs, const double& rhs) {
+        return rhs * std::move(lhs);
+    }
+
+	DualNumber operator/(const double& lhs, const DualNumber& rhs) {
+        return (1 / lhs) * rhs;
+    }
+
+	DualNumber operator/(const DualNumber& lhs, const double& rhs) {
+        return lhs * (1 / rhs);
+    }
+
+	DualNumber operator/(const double& lhs, DualNumber&& rhs) {
+        return (1 / lhs) * std::move(rhs);
+    }
+
+	DualNumber operator/(DualNumber&& lhs, const double& rhs) {
+        return std::move(lhs) * (1 / rhs);
+    }
 }

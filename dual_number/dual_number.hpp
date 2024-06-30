@@ -23,7 +23,7 @@ namespace trainlib {
 		DualNumber1d operator-() const;
 
 		DualNumber1d& operator=(const DualNumber1d&);	// copy
-		DualNumber1d& operator=(const DualNumber1d&&);	// move
+		DualNumber1d& operator=(DualNumber1d&&);	// move
 
 		DualNumber1d& operator+=(const DualNumber1d&);
 		DualNumber1d& operator-=(const DualNumber1d&);
@@ -55,13 +55,54 @@ namespace trainlib {
 
 	class DualNumber {
 	public:
-		DualNumber();
+		DualNumber() = delete;
 		DualNumber(std::size_t);
 
+		DualNumber(const DualNumber&);
+		DualNumber(DualNumber&&);
+
+		DualNumber1d& operator[](const std::size_t& i) {
+			return ptr[i];
+		}
+		const DualNumber1d& operator[](const std::size_t& i) const {
+			return ptr[i];
+		}
+
+		DualNumber operator+() const;
+		DualNumber operator-() const;
+
+		DualNumber& operator=(const DualNumber&);
+		DualNumber& operator=(DualNumber&&);
+		
+		DualNumber& operator+=(const DualNumber&);
+		DualNumber& operator-=(const DualNumber&);
+		DualNumber& operator*=(const double&);
+		DualNumber& operator/=(const double&);
+
 		std::size_t dim;
-		std::unique_ptr<double> firsts;
-		std::unique_ptr<double> seconds;
-	}
+		std::unique_ptr<DualNumber1d[]> ptr;
+	};
+
+	bool operator==(const DualNumber&, const DualNumber&);
+
+	bool operator!=(const DualNumber&, const DualNumber&);
+
+	DualNumber operator+(const DualNumber&, const DualNumber&);
+	DualNumber operator+(const DualNumber&, DualNumber&&);
+	DualNumber operator+(DualNumber&&, const DualNumber&);
+	DualNumber operator+(DualNumber&&, DualNumber&&);
+	DualNumber operator-(const DualNumber&, const DualNumber&);
+	DualNumber operator-(const DualNumber&, DualNumber&&);
+	DualNumber operator-(DualNumber&&, const DualNumber&);
+	DualNumber operator-(DualNumber&&, DualNumber&&);
+	DualNumber operator*(const double&, const DualNumber&);
+	DualNumber operator*(const DualNumber&, const double&);
+	DualNumber operator*(const double&, DualNumber&&);
+	DualNumber operator*(DualNumber&&, const double&);
+	DualNumber operator/(const double&, const DualNumber&);
+	DualNumber operator/(const DualNumber&, const double&);
+	DualNumber operator/(const double&, DualNumber&&);
+	DualNumber operator/(DualNumber&&, const double&);
 }
 
 #endif
