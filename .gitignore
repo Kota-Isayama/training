@@ -1,2 +1,5 @@
 .vscode
 *.out
+
+# 勝手に生成された
+*.dSYM
