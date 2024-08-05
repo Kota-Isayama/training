@@ -1,0 +1,264 @@
+\documentclass{jsarticle}
+
+
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+
+\title{数理ファイナンス3}
+\author{諌山航太}
+
+
+\usepackage{amsthm}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{Definition}[section]
+\newtheorem{prop}[dfn]{Proposition}
+\newtheorem{lem}[dfn]{補題}
+\newtheorem{thm}[dfn]{Theorem}
+\newtheorem{cor}[dfn]{Corollary}
+\newtheorem{rem}[dfn]{Remark}
+% \newtheorem*{rem*}[dfn]{Remark}
+\newtheorem{fact}[dfn]{Fact}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\begin{document}
+\maketitle
+
+\begin{thm}[Girsanovの定理]
+$(\Omega, \mathscr{F}, \mathrm{F}_t, P)$をフィルター付き確率空間とする．また$(W_t)$を$\mathscr{F}_t$BWとし，$\theta_t$を連続適合過程とする．この時，以下のようなマルチンゲール$Z$と$W^Q$を考える.
+\begin{equation*}
+    Z_t := \exp{\left\{-\int_{0}^t \theta_s^2 \mathrm{d} s - \int_{0}^t\theta_s \mathrm{d}W_s\right\}}, \quad W^Q_t = \int_0^t \theta_s \mathrm{d}s + W_t
+\end{equation*}
+この時，$\theta$がNovikov条件$\mathrm{E}^P\left[\exp{(\frac{1}{2}\int_0^t\theta_s^2\mathrm{d}s)}\right] < \infty$等の適当な条件を満たせば，
+\begin{equation*}
+    Q(A) := \inf_A Z(\omega) \mathrm{d}P(\omega), \quad (A\in \mathscr{F})
+\end{equation*}
+で定まる確率測度$Q$のもとで$W^Q$が$\mathscr{F}_t$-BWになる．
+\end{thm}
+
+このギルサノフの定理を用いると，同じ確率微分方程式を異なる確率測度上でのブラウン運動で記述し直すことができる．
+\paragraph{幾何ブラウン運動}
+$P$上のSDE
+\begin{equation*}
+    \frac{\mathrm{d}S_t}{\mathrm{d}t} = \mu \mathrm{d}t + \sigma \mathrm{d} W_t
+\end{equation*}
+これを以下のように変換できる．
+\begin{equation*}
+    \frac{\mathrm{d}S_t}{\mathrm{d}t} = r \mathrm{d}t + \sigma \mathrm{d}W^Q_t
+\end{equation*}
+ただし$W_t^Q = W_t + \int_0^t \frac{\mu - r}{\sigma} \theta_s \mathrm{d}s$であり，ギルサノフの定理の$\theta_t$を$\frac{\mu - r}{\sigma}$とした．
+
+つづいて，ブラウン運動の表現定理の主張を述べる．
+\begin{thm}[BW表現定理]
+    $(\mathscr{F}_t)$をcompleted Brounian Filtorationとする．この時$M$が$\mathscr{F}_t$上の連続マルチンゲールだとすると，ある適合過程$\Gamma$が存在して
+    \begin{equation*}
+        M_t = M_0 + \int_0^t h_u \mathrm{d}W_u, \quad 0 \leq t \leq T
+    \end{equation*}
+    を満たす．
+\end{thm}
+フィルトレーションが一つのブラウン運動によって生成されたものであるならば，このフィルトレーションに関するマルチンゲールは全てその初期条件にブラウン運動による伊藤積分を足したものになるということである．伊藤積分は連続過程であることから，ジャンプを伴うマルチンゲールを得たければ，ブラウン運動とは異なる不確実性の源泉を取り入れたモデルを作る必要がある．また，マルチンゲール$N$が$\mathrm{d}N_t = \sigma_t \mathrm{d}W_t$とかけるとき，$\mathrm{d}M_t = h_t \sigma_t^{-1} \mathrm{d}N_t$とかけるので，
+\begin{equation*}
+    M_t = M_0 + \int_0^t h_s \sigma_s^{-1} \mathrm{d}N_s
+\end{equation*}
+が成立することも重要である．
+
+\section{Black-Scholesモデル}
+以上の重要な定理を用いて，実際にBlack-Scholesモデルにおけるデリバティブのプライシングを行ってみる．まず市場モデルを定式化する．BSモデルでは，自由に取引できる資産として株と預金の２つのみがある．それぞれ以下のように価格が定式化される:
+\begin{enumerate}
+    \item 株: $\mathrm{d}S_t = S_t (\mu \mathrm{d}t + \sigma\mathrm{d}W_t)$,\quad $S_0$は初期値で固定値
+    \item 預金: $\mathrm{d}B_t = rB_t\mathrm{d}t$, $B_0 = 1,\quad r = \text{const}$
+\end{enumerate}
+このモデルでは$\mu, \sigma, r$がパラメータとなっている．
+
+では，この市場におけるデリバティブの価格公式を導いていく．数理ファイナンスにおいてはデリバティブを$\mathscr{F}_T$可測な確率変数$X$で定式化する．これによって，満期$T$に$X$のペイオフが生じるデリバティブであることを表現できる．このデリバティブの価格をつけるにあたって，デリバティブのペイオフを完全に複製するSelf-Financingなポートフォリオを構築したい．そのようなポートフォリオが構築できれば，そのポートフォリオの価値がそのままデリバティブの価値とみなせる．というか，そうみなさないと，裁定機会が生じてしまう．
+
+では，ポートフォリオを$(\phi, \psi)$とおく．それぞれ適合過程で，時刻$t$における各資産の保有量を表している．このポートフォリオの価値を$V_t$とすれば，以下の等式がなりたつことを求める:
+\begin{itemize}
+    \item $V_t = \phi_t S_t + \psi_t + B_t$
+    \item $\mathrm{d}V_t = \phi_t \mathrm{d}S_t + \psi_t + \mathrm{d}B_t$
+    \item $V_T = X$
+\end{itemize}
+２つめの等式が，ポートフォリオがself-financingであることの定式化である．株価や預金の価格変動によってのみ，ポートフォリオの価値が変動することを表している．
+
+ここで唐突ではあるが，割引株価過程$Z$というものを考えてみる．
+\begin{equation*}
+    Z_t := B_t^{-1} S_t
+\end{equation*}
+\begin{align*}
+    \mathrm{d}Z_t &= B_t^{-1}\mathrm{d}S_t + S_t\mathrm{d}B_t^{-1} + \mathrm{d}B_t^{-1}\mathrm{d}S_t\\
+    &= Z_t\left\{(\mu - r) \mathrm{d}t + \sigma \mathrm{d}W_t\right\}
+\end{align*}
+ここで$\theta := \frac{\mu - r}{\sigma}$によってGirsanov変換を施すと
+$\mathrm{d}W^Q_t = \mathrm{d}W_t + \theta t$より$Q$上では$\mathrm{d}Z_t = Z_t\sigma \mathrm{d}W^Q_t$だからマルチンゲールとなる．
+ここで$E_t := \mathrm{E}^Q\left[B_T^{-1} X \mid \mathscr{F}_t\right]$は$Q$-マルチンゲールであるから，表現定理より$E_t$を$Z_t$で表現できて，
+
+\begin{equation*}
+    \mathrm{d}E_t = \phi_t \mathrm{d}Z_t, \quad E_t - \psi_t Z_t
+\end{equation*}
+
+とすれば
+\begin{enumerate}
+    \item $(\phi, \psi)$が適合過程で
+    \item $V_T = X$を満たし\par
+            $V_t = \phi_t S_t + (E_t - \psi_t Z_t) B_t = E_t B_t = B_t \mathrm{E}^Q\left[B_T^{-1} X \mid \mathscr{F}_t\right]$の両辺で$t=T$とすれば良い
+    \item Self-financingである．\par
+            \begin{align*}
+                \mathrm{d}V_t &= E_t \mathrm{d}B_t + B_t\mathrm{d}E_t \mathrm{d}B_t\mathrm{d}E_t\\
+                &= (\phi_t Z_t + \psi_t)\mathrm{d}B_t + B_t (\phi_t \mathrm{d}Z_t) + \phi_t\mathrm{d} B_t\mathrm{d}Z_t\\
+                &= \phi_t (Z_t\mathrm{d}B_t + B_t \mathrm{d}Z_t + \mathrm{B_t}\mathrm{d}Z_t) + \psi_t \mathrm{d}B_t\\
+                &= \phi_t \mathrm{d}(Z_t B_t) + \psi_t \mathrm{d}B_t\\
+                &= \phi_t \mathrm{d}S_t  + \psi_t \mathrm{d}B_t
+            \end{align*}
+\end{enumerate}
+であることがわかる．従って複製ポートフォリオが生成できた．
+
+よって，$V_t = B_t\mathrm{E}^Q \left[B_T^{-1}X \mid \mathscr{F}_t\right]$という公式を得た．（リスク中立確率$Q$と使うと，デリバティブの現在価値が計算できる）
+
+\section{オプション公式}
+複製ポートフォリオを$V_t := \phi_t S_t + \psi_t B_t$とする．ただし$\phi, \psi$は$\mathscr{F}_t$適合であり，$\mathrm{d}V_t = \phi_t \mathrm{d}St + \psi_t \mathrm{d}B_t$を満たすとする．さrない$V_T = (S_T - K)^+$とすると，
+\begin{equation*}
+    V_t = B_t \mathrm{E}^Q\left[B_T^{-1}(S_t - K)^+ \mid \mathscr{F}_t\right]
+\end{equation*}
+が成り立つことを，前章で見た．以下ではこれにまつわる幾つかの公式を導出する．
+
+\begin{lem}
+    $$
+    \mathrm{E}\left[(e^{\mu + \sigma Z} - k)^+\right] = e^{\mu + \frac{\sigma^2}{2}} \Phi(\frac{\log{k} - \mu \sigma^2}{\sigma}) - k (1 - \Phi(\frac{\log{k} - \mu}{\sigma}))
+    $$
+    ただし$Z$は標準正規分布に従う確率変数で，$\mu, \sigma, k$は定数で$\sigma > 0$である．
+\end{lem}
+\begin{proof}
+    流石に計算すれば良い
+\end{proof}
+
+これを用いると，オプションの価格を具体的に計算することができる．
+\begin{align*}
+    V_t &= B_0 \mathrm{E}^Q\left[B_T^{-1} (S_T - K)^+ \mid \mathscr{F}_t\right]\\
+    &= B_T^{-1}\mathrm{E}^Q\left[(S_T - K)^+ \mid \mathscr{F}_t\right]\\
+    &= e^{-rT}\mathrm{E}^Q\left[\left(S_0\exp{(r - \frac{1}{2}\sigma^2)T + \sigma W_T} - K\right)^+ \mid \mathscr{F}_t\right]\\
+    &= S_0 e^{-rT}\mathrm{E}^Q\left[\left(\exp{\left\{(r - \frac{1}{2}\sigma^2)T + \sigma W_T\right\}} - K / S_0\right)^+ \mid \mathscr{F}_t\right]\\
+    &= S_t \Phi(d_1) - Ke^{-r(T - t)}\Phi(d_2)
+\end{align*}
+ただし
+$$
+    d_1 = \frac{\log{\frac{S_t}{k}} + (r + \frac{\sigma^2}{2}) (T - t)}{\sigma\sqrt{T - t}}, \quad d_2 = \frac{\log{\frac{S_t}{k}} + (r - \frac{\sigma^2}{2}) (T - t)}{\sigma\sqrt{T - t}}
+$$
+である．
+
+\begin{lem}
+    $$
+    S_t \phi(d_1) = Ke^{-r(T - t)}\phi(d_2)
+    $$
+\end{lem}
+\begin{proof}
+    計算すればわかる．
+\end{proof}
+
+以上の計算結果を用いて，オプション価格のグリークスを計算できる．
+
+\paragraph{デルタ}
+\begin{equation*}
+    \frac{\partial V}{\partial S} = \Phi(d_1) + S_t \phi(d_1) \frac{1}{\sigma \sqrt{T - t}}\frac{1}{S_t} - Ke^{-r(T - t)}\phi(d_2) \frac{1}{\sigma\sqrt{T - t}}\frac{1}{S_t} = \Phi(d_1)
+\end{equation*}
+特に，コールオプションのデルタは0以上1以下であることがわかる．
+
+\paragraph{ガンマ}
+\begin{equation*}
+    \frac{\partial^2 V}{\partial S^2} = \phi(d_1)\frac{1}{\sigma\sqrt{T - t}}\frac{1}{S_t}
+\end{equation*}
+この値は常に正であることに注意されたい．この事実から，コールオプションの買いをガンマのロングと言ったりする．
+
+\paragraph{ベガ}
+\begin{equation*}
+    \frac{\partial V}{\partial \sigma} = S_t\phi(d_1)\frac{\partial d_1}{\partial \sigma} - Ke^{-r(T - t)}\phi(d_2) \frac{\partial d_2}{\partial \sigma} = 
+\end{equation*}
+
+\paragraph{セータ}
+\begin{align*}
+    \frac{\partial V}{\partial t} &= S_t \phi(d_1) \frac{\partial d_1}{\partial t} - Kre^{-r(T-t)}\Phi(d_2) - Ke^{-r(T - t)}\phi(d_2)\frac{\partial d_2}{\partial t}\\
+    &= 
+\end{align*}
+特にコールオプションのセータは常に負であるため，コールの買いをセータのショートと呼んだりする．
+
+\paragraph{プットオプションについて}
+$C - P = S_0 - Ke^{-r(T-t)}$であることから，以下のことが言える
+\begin{itemize}
+    \item デルタ $\Phi(d_1) - 1$
+    \item ガンマ コールと同じ
+    \item ベガ コールと同じ
+    \item $\text{コールのセータ} + rk e^{-r(T - t)}$
+\end{itemize}
+
+\section{PDE}
+これまではリスク中立測度を経由してオプションの価格を計算してきた．ここでは別の観点からオプションの価格を計算する方法を示す．オプション価格が満たすべきPDEを導く方法である．
+
+時刻$t$，原資産価格$x$の時のコールの価値を$c(t, x)$とおく．伊藤の公式より
+
+\begin{align*}
+    \mathrm{d}(c(t, S_t)) &= c_t(t, S_t) \mathrm{d}t + c_x(t, S_t) \mathrm{d}S_t + \frac{1}{2}c_{xx}(t, S_t) \mathrm{d}S_t\mathrm{d}S_t\\
+    &= (c_t + \mu c_x S_t + \frac{1}{2}\sigma^2 S_t c_{xx} S_t^2)\mathrm{d}t + \sigma c_x S_t \mathrm{d}W_t
+\end{align*}
+一方で，デリバティブの複製戦略を取ると，
+\begin{align*}
+    \mathrm{d}V_t = \phi_t \mathrm{d}S_t + \psi_t \mathrm{d}B_t = (\phi_t \mu S_t + r \psi_t B_t) \mathrm{d}t + \phi_t \sigma S_t \mathrm{d}W_t
+\end{align*}
+この$\mathrm{d}W_t$の係数を比較すると，$\phi_t = c_x$を得る．つまりこのデリバティブの複製戦略を取るときの各時刻における株の保有数が分かった．
+
+さらに$\mathrm{d}t$の項を比較・整理すると
+\begin{equation*}
+    c_t(t, S_t) + rS_tc_x(t, S_t) + \frac{1}{2}\sigma^2 S_t^2c_{xx}(t, S_t) - rc(t, S_t) = 0
+\end{equation*}
+を得る．従って$c(t, x)$は以下のPDEを満たすことが求められる．
+\begin{equation*}
+    c_t(t, x) + rxc_x(t, x) + \frac{1}{2}\sigma^2 x^2c_{xx}(t, x) - rc(t, x) = 0
+\end{equation*}
+これを解けば，オプションの価格が得られるということである．
+
+\section{外国為替}
+ここでは，外国為替のモデルを考えてみる．
+$(\Omega, \mathscr{F}, \mathscr{F}_t, P)$をフィルター付き確率空間とする．今回考える市場モデルは日本円の預金，ドルの預金，ドル円為替の３つである．
+\begin{itemize}
+    \item 日本の預金 $B_t^¥ = \exp{(r_d t)}$
+    \item ドルの預金 $B_t^\$ = \exp{(r_f t}$
+    \item ドル円為替 $C_t = C_0 \exp{(\sigma W + \mu t)}$．ただし時刻$t$において$1$ドルが$C_t$円だということである．
+\end{itemize}
+ここで，満期$T$にペイオフ$X$円が生じるデリバティブの現在価値を，円とドルそれぞれを基準財として計算してみる．
+\paragraph{日本円} 日本人は$B_t^¥$と$c_t B_t^\$$を資産としてデリバティブを複製しようとする．ここでリスク中立評価法を用いるとデリバティブ$X$の日本円における価値は
+$$
+ V_t^¥ = B_t^¥ \mathrm{E}^{Q^¥}\left[{B_t^¥}^{-1} X \mid \mathscr{F}_t\right]
+$$
+と定まる．ではこのリスク中立測度は何か？
+$$
+    {B_t^¥}^{-1} C_t B_t^\$ = C_0 \exp{\left(\sigma W_t + (\mu + r_f - r_d) t\right)}
+$$
+であるが，$\Tilde{W}_t = W_t + \frac{\mu + r_f - r_d + \frac{1}{2}\sigma^2}{\sigma} t$とすると，ギルサノフの定理よりこれがブラウン運動となる確率測度がとれる．この確率測度のもとで${B_t^¥}^{-1} C_t B_t^\$$はマルチンゲールである（したがって複製戦略の存在が表現定理より言えて，上記のデリバティブの価格が正当化される）．
+
+\paragraph{アメリカドル}
+一方で，ドル換算した時のペイオフ$C_t^{-1}X$ドルの価値を計算してみる．この時複製ポートフォリオの構築に用いられる資産は
+\begin{itemize}
+    \item ドル $B_t^\$ = \exp{(r_f t)}$
+    \item ドル換算した円 $C_t^{-1} B_t^¥ = C_0^{-1}\exp{(-\sigma W_t - (\mu - r_d)t}$
+\end{itemize}
+である．ここで複製戦略の存在を示すため，${B_t^\$}^{-1} C_t^{-1} B_t^¥ = C_0^{-1}\exp{(-\sigma W_t - (\mu + r_f - r_d)t)}$をマルチンゲールとする確率測度の存在を確かめたい．それは実際にギルサノフの定理から示すことができる．
+$$
+ W_t^\$ = W_t + \frac{\mu + r_f - r_d - \frac{1}{2}\sigma^2}{\sigma} t
+$$
+がブラウン運動になるような$Q^\$$が取れる．この確率測度のしたではマルチンゲールとなる．従って上記のリスク中立評価法による価格評価が正当化される．
+
+\paragraph{２つの評価式の整合性}
+以上，２つの視点からデリバティブを評価したが，この評価値は整合性がとれているだろうか？具体的には，
+$$
+ V_t^¥ = C_t V_t^\$
+$$
+が成り立つかということである．答えは成り立つ．頑張って測度変換する．
+
+
+\end{document}
